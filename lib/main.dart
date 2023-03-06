@@ -10,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:substring_highlight/substring_highlight.dart';
 
 void main() {
   runApp(const MyApp());
@@ -47,6 +48,10 @@ bool _dragging = false;
 int selectedIndex = 0;
 // List of the csv of the chats
 List<List> chatData = List<List<dynamic>>.empty(growable: true);
+// Main search controller
+final searchController = TextEditingController();
+// Main search query
+String mainSearchQuery = '';
 // Owner of the messages (controller)
 final ownerNameController = TextEditingController();
 // Owner name string
@@ -94,6 +99,13 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
           .toList());
       senderNames.add(groupNames(fields));
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    searchController.dispose();
+    ownerNameController.dispose();
   }
 
   @override
@@ -243,8 +255,8 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
-                                      children: const [
-                                        SizedBox(
+                                      children: [
+                                        const SizedBox(
                                             width: 60,
                                             child: Icon(
                                               Icons.search,
@@ -253,13 +265,20 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                             )),
                                         Expanded(
                                           child: TextField(
-                                            style: TextStyle(
+                                            controller: searchController,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                mainSearchQuery =
+                                                    searchController.text;
+                                              });
+                                            },
+                                            style: const TextStyle(
                                                 fontSize: 15,
                                                 color: Colors.white70),
                                             cursorColor: Colors.white70,
                                             cursorWidth: 1,
                                             decoration:
-                                                InputDecoration.collapsed(
+                                                const InputDecoration.collapsed(
                                                     floatingLabelBehavior:
                                                         FloatingLabelBehavior
                                                             .never,
@@ -286,16 +305,40 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                       setState(() {
                                         selectedIndex = index;
                                       });
+                                      // When click, go to the selected
                                       _scrollController.jumpTo(
-                                                index: 0);
+                                          index: mainSearchQuery.isEmpty
+                                              ? 0
+                                              : chatData[index].indexWhere(
+                                                  (element) => element
+                                                      .toString()
+                                                      .toLowerCase()
+                                                      .contains(mainSearchQuery
+                                                          .toLowerCase())));
                                     },
                                     child: Padding(
                                       padding: const EdgeInsets.only(right: 12),
-                                      child: BaseChatPreview(
-                                          selected: selectedIndex == index,
-                                          group: senderNames[index].length > 2,
-                                          chatName: chatName(chatList[index]),
-                                          indexOfChat: index,),
+                                      child: (chatData[index].indexWhere((element) => element
+                                                  .toString()
+                                                  .toLowerCase()
+                                                  .contains(mainSearchQuery
+                                                      .toLowerCase())) !=
+                                              -1)
+                                          ? BaseChatPreview(
+                                              selected: selectedIndex == index,
+                                              group:
+                                                  senderNames[index].length > 2,
+                                              chatName:
+                                                  chatName(chatList[index]),
+                                              indexOfChat: index,
+                                              highlighted: mainSearchQuery,
+                                              indexOfMessage: mainSearchQuery.isEmpty
+                                                  ? 0
+                                                  : chatData[index].indexWhere((element) => element
+                                                      .toString()
+                                                      .toLowerCase()
+                                                      .contains(mainSearchQuery.toLowerCase())))
+                                          : Container(),
                                     ),
                                   );
                                 },
@@ -405,7 +448,7 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                     String preAuthor = '';
                                     String preDate = '';
                                     if (index <
-                                        chatData[selectedIndex].length) {
+                                        chatData[selectedIndex].length - 1) {
                                       // Message string, has [] around
                                       final preMsgStr = chatData[selectedIndex]
                                               [index + 1]
@@ -479,13 +522,18 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                                             sender == preAuthor,
                                                         time: time,
                                                       ),
-                                                      if (index == 0)
-                                                      Container(height: 20,)
+                                          if (index == 0)
+                                            Container(
+                                              height: 20,
+                                            )
                                         ],
                                       ),
                                     );
                                   },
                                 )),
+                                Container(
+                                  height: 5,
+                                ),
                               ],
                             ),
                           ))
@@ -656,12 +704,16 @@ class BaseChatPreview extends StatelessWidget {
   final bool selected;
   final bool group;
   final int indexOfChat;
+  final int indexOfMessage;
+  final String highlighted;
   const BaseChatPreview(
       {Key? key,
       required this.chatName,
       required this.selected,
       required this.group,
-      required this.indexOfChat})
+      required this.indexOfChat,
+      required this.indexOfMessage,
+      required this.highlighted})
       : super(key: key);
 
   @override
@@ -715,14 +767,53 @@ class BaseChatPreview extends StatelessWidget {
                               color: Color.fromRGBO(232, 237, 239, 1),
                               fontSize: 16),
                         ),
-                        Text(
-                          group?
-                          chatData[indexOfChat].first.toString().replaceFirst('[', '').replaceAll(']', '').split(' - ').last : chatData[indexOfChat].first.toString().replaceFirst('[', '').replaceAll(']', '').split(': ').last,
-                          style: const TextStyle(
-                            overflow: TextOverflow.ellipsis,
-                              color: Color.fromRGBO(134, 150, 160, 1),
-                              fontSize: 14),
-                        ),
+                        Directionality(
+                            textDirection: TextDirection.ltr,
+                            child: SubstringHighlight(
+                              overflow: TextOverflow.ellipsis,
+                              text: group
+                                  ? chatData[indexOfChat][indexOfMessage]
+                                      .toString()
+                                      .replaceFirst('[', '')
+                                      .replaceAll(']', '')
+                                      .split(' - ')
+                                      .last
+                                  : chatData[indexOfChat][indexOfMessage]
+                                      .toString()
+                                      .replaceFirst('[', '')
+                                      .replaceAll(']', '')
+                                      .split(': ')
+                                      .last,
+                              term: highlighted,
+                              textStyle: const TextStyle(
+                                  overflow: TextOverflow.ellipsis,
+                                  color: Color.fromRGBO(134, 150, 160, 1),
+                                  fontSize: 14),
+                              textStyleHighlight: const TextStyle(
+                                  overflow: TextOverflow.ellipsis,
+                                  color: Color.fromRGBO(0, 168, 132, 1.0),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14),
+                            )),
+                        // Text(
+                        //   group
+                        //       ? chatData[indexOfChat][indexOfMessage]
+                        //           .toString()
+                        //           .replaceFirst('[', '')
+                        //           .replaceAll(']', '')
+                        //           .split(' - ')
+                        //           .last
+                        //       : chatData[indexOfChat][indexOfMessage]
+                        //           .toString()
+                        //           .replaceFirst('[', '')
+                        //           .replaceAll(']', '')
+                        //           .split(': ')
+                        //           .last,
+                        //   style: const TextStyle(
+                        //       overflow: TextOverflow.ellipsis,
+                        //       color: Color.fromRGBO(134, 150, 160, 1),
+                        //       fontSize: 14),
+                        // ),
                       ],
                     ),
                   ),
