@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:substring_highlight/substring_highlight.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   runApp(const MyApp());
@@ -81,6 +82,11 @@ List<Color> senderColors = [
   const Color.fromRGBO(65, 199, 184, 1),
   const Color.fromRGBO(165, 179, 55, 1)
 ];
+
+// Track the requested index
+// int requestedIndex = 0;
+// // Change the color for hihglighting search results
+// Color highlightColor = Colors.transparent;
 
 class _WhatsAppUIState extends State<WhatsAppUI> {
   openFile(filepath) async {
@@ -305,6 +311,13 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                       setState(() {
                                         selectedIndex = index;
                                       });
+                                      // if (mainSearchQuery.isNotEmpty)
+                                      // {requestedIndex = chatData[selectedIndex].indexWhere(
+                                      //             (element) => element
+                                      //                 .toString()
+                                      //                 .toLowerCase()
+                                      //                 .contains(mainSearchQuery
+                                      //                     .toLowerCase()));}
                                       // When click, go to the selected
                                       _scrollController.jumpTo(
                                           index: mainSearchQuery.isEmpty
@@ -315,6 +328,11 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                                       .toLowerCase()
                                                       .contains(mainSearchQuery
                                                           .toLowerCase())));
+                                      // setState(() {
+                                      //   highlightColor = Colors.white;
+                                      //   sleep(Duration(milliseconds: 500));
+                                      //   highlightColor = Colors.transparent;
+                                      // });
                                     },
                                     child: Padding(
                                       padding: const EdgeInsets.only(right: 12),
@@ -478,7 +496,10 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                         isOwner = true;
                                       }
                                     }
-                                    return Container(
+                                    
+                                    return AnimatedContainer(
+                                      duration: const Duration(milliseconds: 500),
+                                      // color: (requestedIndex == index && mainSearchQuery.isNotEmpty)? highlightColor : Colors.transparent,
                                       padding: const EdgeInsets.fromLTRB(
                                           40, 0, 40, 0),
                                       width: double.infinity,
@@ -602,8 +623,8 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
 
 // Get chat name
   String chatName(XFile fileName) {
-    return fileName.path
-        .split('/')
+    return p
+        .split(fileName.path)
         .last
         .replaceAll('WhatsApp Chat with ', '')
         .replaceAll('.txt', '');
