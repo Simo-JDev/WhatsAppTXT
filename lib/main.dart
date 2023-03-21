@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:substring_highlight/substring_highlight.dart';
 import 'package:path/path.dart' as p;
+import 'package:flutter/foundation.dart';
 
 void main() {
   runApp(const MyApp());
@@ -188,61 +189,69 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                 color: const Color.fromRGBO(33, 44, 51, 1),
                                 width: double.infinity,
                                 height: 58,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          ownerName = ownerNameController.text;
-                                          ownerNameLocked = !ownerNameLocked;
-                                        });
-                                      },
-                                      child: SizedBox(
-                                          width: 60,
-                                          child: !ownerNameLocked
-                                              ? const Icon(
-                                                  Icons.lock_open_rounded,
-                                                  color: Color.fromRGBO(
-                                                      98, 112, 120, 1),
-                                                )
-                                              : const Icon(
-                                                  Icons.lock_outline_rounded,
-                                                  color: Color.fromRGBO(
-                                                      98, 112, 120, 1),
-                                                )),
-                                    ),
-                                    Expanded(
-                                      child: ownerNameLocked
-                                          ? Text(
-                                              ownerName,
-                                              style: const TextStyle(
-                                                  fontSize: 15,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500),
-                                            )
-                                          : TextField(
-                                              controller: ownerNameController,
-                                              style: const TextStyle(
-                                                  fontSize: 15,
-                                                  color: Colors.white70),
-                                              cursorColor: Colors.white70,
-                                              cursorWidth: 1,
-                                              decoration: const InputDecoration
-                                                      .collapsed(
-                                                  floatingLabelBehavior:
-                                                      FloatingLabelBehavior
-                                                          .never,
-                                                  hintText:
-                                                      'Type your name as saved on the .txt',
-                                                  hintStyle: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w300,
-                                                      color: Color.fromRGBO(
-                                                          98, 112, 120, 1))),
-                                            ),
-                                    )
-                                  ],
+                                child: Padding(
+                                  padding: (defaultTargetPlatform ==
+                                          TargetPlatform.macOS)
+                                      ? const EdgeInsets.only(left: 70)
+                                      : const EdgeInsets.all(0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            ownerName =
+                                                ownerNameController.text;
+                                            ownerNameLocked = !ownerNameLocked;
+                                          });
+                                        },
+                                        child: SizedBox(
+                                            width: 60,
+                                            child: !ownerNameLocked
+                                                ? const Icon(
+                                                    Icons.lock_open_rounded,
+                                                    color: Color.fromRGBO(
+                                                        98, 112, 120, 1),
+                                                  )
+                                                : const Icon(
+                                                    Icons.lock_outline_rounded,
+                                                    color: Color.fromRGBO(
+                                                        98, 112, 120, 1),
+                                                  )),
+                                      ),
+                                      Expanded(
+                                        child: ownerNameLocked
+                                            ? Text(
+                                                ownerName,
+                                                style: const TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.white,
+                                                    fontWeight:
+                                                        FontWeight.w500),
+                                              )
+                                            : TextField(
+                                                controller: ownerNameController,
+                                                style: const TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.white70),
+                                                cursorColor: Colors.white70,
+                                                cursorWidth: 1,
+                                                decoration: const InputDecoration
+                                                        .collapsed(
+                                                    floatingLabelBehavior:
+                                                        FloatingLabelBehavior
+                                                            .never,
+                                                    hintText:
+                                                        'Type your name as saved on the .txt',
+                                                    hintStyle: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w300,
+                                                        color: Color.fromRGBO(
+                                                            98, 112, 120, 1))),
+                                              ),
+                                      )
+                                    ],
+                                  ),
                                 ),
                               ),
                               Container(
@@ -433,20 +442,20 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                             ),
                                           ),
                                         ),
-                                        GestureDetector(
-                                          onTap: () {
-                                            _scrollController.scrollTo(
-                                                index: 10,
-                                                duration: const Duration(
-                                                    milliseconds: 200),
-                                                curve: Curves.easeInOutCubic);
-                                          },
-                                          child: const Icon(
-                                            Icons.search,
-                                            color:
-                                                Color.fromRGBO(98, 112, 120, 1),
-                                          ),
-                                        )
+                                        // GestureDetector(
+                                        //   onTap: () {
+                                        //     _scrollController.scrollTo(
+                                        //         index: 10,
+                                        //         duration: const Duration(
+                                        //             milliseconds: 200),
+                                        //         curve: Curves.easeInOutCubic);
+                                        //   },
+                                        //   child: const Icon(
+                                        //     Icons.search,
+                                        //     color:
+                                        //         Color.fromRGBO(98, 112, 120, 1),
+                                        //   ),
+                                        // )
                                       ],
                                     ),
                                   ),
@@ -497,9 +506,8 @@ class _WhatsAppUIState extends State<WhatsAppUI> {
                                       }
                                     }
                                     
-                                    return AnimatedContainer(
-                                      duration: const Duration(milliseconds: 500),
-                                      // color: (requestedIndex == index && mainSearchQuery.isNotEmpty)? highlightColor : Colors.transparent,
+                                    
+                                    return Container(
                                       padding: const EdgeInsets.fromLTRB(
                                           40, 0, 40, 0),
                                       width: double.infinity,
@@ -924,36 +932,42 @@ class OutText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 70),
+      padding: const EdgeInsets.only(left: 0),
       child: Column(
         children: [
           if (!isSameSender)
             const SizedBox(
               height: 12,
             ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
-            child: Bubble(
-              color: const Color.fromRGBO(0, 92, 75, 1.0),
-              alignment: Alignment.topRight,
-              nip: BubbleNip.rightTop,
-              showNip: !isSameSender,
-              child:
-                  Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text(
-                  text,
-                  style:
-                      const TextStyle(color: Color.fromRGBO(232, 237, 239, 1)),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 5),
-                  child: Text(
-                    time,
-                    style: const TextStyle(
-                        fontSize: 11, color: Color.fromRGBO(169, 173, 176, 1)),
-                  ),
-                )
-              ]),
+          Container(
+            // Color for search animation
+            // color: const Color.fromRGBO(255, 255, 255, 0.2),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 1, 8, 1),
+              child: Bubble(
+                color: const Color.fromRGBO(0, 92, 75, 1.0),
+                alignment: Alignment.topRight,
+                nip: BubbleNip.rightTop,
+                showNip: !isSameSender,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        text,
+                        style: const TextStyle(
+                            color: Color.fromRGBO(232, 237, 239, 1)),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: Text(
+                          time,
+                          style: const TextStyle(
+                              fontSize: 11,
+                              color: Color.fromRGBO(169, 173, 176, 1)),
+                        ),
+                      )
+                    ]),
+              ),
             ),
           ),
         ],
